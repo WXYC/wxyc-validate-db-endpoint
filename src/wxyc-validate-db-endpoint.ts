@@ -157,7 +157,7 @@ app.get('/reset', async (req: Request, res: Response): Promise<void> => {
     console.log('SSH connection established successfully');
 
     // Execute the script with explicit Java environment setup for ksh
-    const command = "export JAVA_HOME=/usr/lib/java; export PATH=/usr/local/jdk/bin:$PATH; ./stopTomcat.sh && sleep 5 && ./startTomcat.sh";
+    const command = "export JAVA_HOME=/home1/t/tubafrenzy/jdk11; export PATH=/home1/t/tubafrenzy/jdk11/bin:$PATH; ./scripts/stop-tomcat.sh && sleep 5 && ./scripts/start-tomcat.sh";
     console.log(`Executing command: ${command}`);
     
     const result = await ssh.execCommand(command);
