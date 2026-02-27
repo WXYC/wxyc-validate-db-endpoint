@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  smoke-test:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Railway deploy
+        run: sleep 90
+
+      - name: Smoke test staging
+        run: |
+          max_attempts=10
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            echo "Attempt $attempt of $max_attempts..."
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+              https://wxyc-validate-db-endpoint-staging.up.railway.app/healthz)
+            if [ "$status" = "200" ]; then
+              echo "Smoke test passed (HTTP $status)"
+              exit 0
+            fi
+            echo "Got HTTP $status, retrying in 30s..."
+            attempt=$((attempt + 1))
+            sleep 30
+          done
+          echo "Smoke test failed after $max_attempts attempts"
+          exit 1
