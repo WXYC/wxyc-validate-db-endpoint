@@ -33,7 +33,7 @@ jobs:
           while [ $attempt -le $max_attempts ]; do
             echo "Attempt $attempt of $max_attempts..."
             status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
-              https://wxyc-validate-db-endpoint-staging.up.railway.app/healthz)
+              https://wxyc-validate-db-endpoint-staging.up.railway.app/healthz) || true
             if [ "$status" = "200" ]; then
               echo "Smoke test passed (HTTP $status)"
               exit 0
